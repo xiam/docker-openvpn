@@ -2,6 +2,8 @@ DH_PARAMS_SIZE       ?= 2048
 REMOTE_IP     ?= 127.0.0.1
 
 DOCKER_IMAGE  ?= xiam/openvpn
+DOCKER_TAG    ?= latest
+
 CLIENT_NAME   ?= client
 
 HOST_UID      ?= $(shell id -u)
@@ -30,6 +32,10 @@ directories:
 
 docker-build:
 	docker build -t $(DOCKER_IMAGE) .
+
+docker-push: docker-build
+	docker tag $(DOCKER_IMAGE) $(DOCKER_IMAGE):$(DOCKER_TAG) && \
+	docker push $(DOCKER_IMAGE)
 
 private/ca.key:
 	$(call docker_run,ovpn-cfgen build-ca --workdir private)
