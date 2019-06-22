@@ -3,7 +3,7 @@
 The goal of this project is to provide a hassle-free OpenVPN experience for
 anyone, certificates and keys are managed within the container and both client
 and server are configured with sane values. With `docker-openvpn` you can spin
-up a new OpenVPN server in minutes with minimal effort.
+up a new OpenVPN server in less than a minute with minimal effort.
 
 ## Automatic deployment (with ansible)
 
@@ -51,8 +51,9 @@ curl ifconfig.co
 # 192.168.8.7
 ```
 
-For each client you want to add set a `CLIENT_NAME` env var, don't forget
-to set `REMOTE_HOST` as well:
+For each client you want to add set a `CLIENT_NAME` env var and
+run `make deploy` again, don't forget to set `REMOTE_HOST` as
+well:
 
 ```
 CLIENT_NAME=mba13 REMOTE_HOST=192.168.8.7 make deploy
