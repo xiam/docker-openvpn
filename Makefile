@@ -48,7 +48,7 @@ private/key.tlsauth:
 	$(call docker_run,openvpn --genkey --secret private/key.tlsauth)
 
 private/clients/%.key: private/ca.key
-	$(call docker_run,ovpn-cfgen build-key --key private/ca.key --cert private/ca.crt --workdir private/clients --name $(basename $@))
+	$(call docker_run,ovpn-cfgen build-key --key private/ca.key --cert private/ca.crt --workdir private/clients --name $$(basename $@ .key))
 
 config/server.conf: private/server.key
 	$(call docker_run,ovpn-cfgen server-config --ca private/ca.crt --cert private/server.crt --key private/server.key --dh private/dh.pem --tls-crypt private/key.tlsauth --output config/server.conf)

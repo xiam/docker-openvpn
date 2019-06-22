@@ -43,6 +43,13 @@ that you can use to connect to your shiny new OpenVPN server:
 openvpn --config client.ovpn
 ```
 
+Check if you exit IP changed after connecting to the VPN:
+
+```
+curl ifconfig.co
+# 192.168.8.7
+```
+
 For each client you want to add set a `CLIENT_NAME` env var, don't forget
 to set `REMOTE_IP` as well:
 

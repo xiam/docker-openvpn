@@ -1,18 +1,19 @@
-FROM golang:1.12-stretch AS builder
+FROM golang:1.12-alpine AS builder
+
+RUN apk add --no-cache \
+  git
 
 RUN go get github.com/xiam/openvpn-config-generator/cmd/ovpn-cfgen
 
-FROM centos:7
+FROM alpine:3.10
 
 COPY --from=builder /go/bin/ovpn-cfgen /usr/bin/
 
-RUN yum install -y epel-release
-
-RUN yum install -y \
-	net-tools \
+RUN apk add --no-cache \
+  iperf \
+  shadow \
   openssl \
-	openvpn \
-	curl
+  openvpn
 
 WORKDIR /openvpn
 

@@ -43,20 +43,35 @@
         dest: ./
         flat: yes
 
+    - name: create ccd directory
+      file:
+        dest: /opt/openvpn/ccd
+        state: directory
+
+    - name: create ipp.txt file
+      file:
+        dest: /opt/openvpn/ipp.txt
+        state: touch
+
     - name: run openvpn server
       docker_container:
         name: "openvpn-server"
         image: "{{ docker_image_tag }}"
+        pull: yes
+        recreate: yes
+        restart: yes
+        restart_policy: always
         ports:
           - "{{ remote_ip }}:1194:1194/udp"
         volumes:
           - /opt/openvpn/config:/openvpn/config
-          - /opt/openvpn/config/ccd:/openvpn/ccd
+          - /opt/openvpn/ccd:/openvpn/ccd
+          - /opt/openvpn/ipp.txt:/openvpn/ipp.txt
         capabilities:
           - NET_ADMIN
         devices:
           - /dev/net/tun:/dev/net/tun
         command: openvpn --config config/server.conf
-        recreate: yes
-        restart: yes
-        restart_policy: always
+
+    - name: set iptables rule
+      shell: "docker exec -t openvpn-server sh -c 'iptables -t nat -A POSTROUTING -s 10.9.0.0/24 -o eth0 -j MASQUERADE'"
