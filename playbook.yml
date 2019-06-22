@@ -62,7 +62,7 @@
         restart: yes
         restart_policy: always
         ports:
-          - "{{ remote_ip }}:1194:1194/udp"
+          - "0.0.0.0:1194:1194/udp"
         volumes:
           - /opt/openvpn/config:/openvpn/config
           - /opt/openvpn/ccd:/openvpn/ccd

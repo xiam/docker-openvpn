@@ -26,12 +26,13 @@ cd ~/projects
 git clone https://github.com/xiam/docker-openvpn.git
 ```
 
-Get into the `docker-openvpn` directory and run `make deploy`, pass a
-`REMOTE_IP` environment variable that matches the IP of the remote host:
+Get into the `docker-openvpn` directory and run `make deploy`,
+pass a `REMOTE_HOST` environment variable that matches the IP/FQDN
+of the remote server:
 
 ```
 cd docker-openvpn
-REMOTE_IP=192.168.8.7 make deploy
+REMOTE_HOST=192.168.8.7 make deploy
 ```
 
 Wait a few seconds while your OpenVPN server gets configured.
@@ -51,10 +52,10 @@ curl ifconfig.co
 ```
 
 For each client you want to add set a `CLIENT_NAME` env var, don't forget
-to set `REMOTE_IP` as well:
+to set `REMOTE_HOST` as well:
 
 ```
-CLIENT_NAME=mba13 REMOTE_IP=192.168.8.7 make deploy
+CLIENT_NAME=mba13 REMOTE_HOST=192.168.8.7 make deploy
 # cat mba13.ovpn
 ```
 
