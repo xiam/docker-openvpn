@@ -1,0 +1,62 @@
+---
+- hosts: all
+  remote_user: root
+  tasks:
+
+    - name: add docker module
+      pip:
+        name: docker
+
+    - name: add openvpn user
+      user:
+        name: openvpn
+        comment: OpenVPN
+        create_home: no
+
+    - name: create destination directory
+      file:
+        path: /opt/openvpn
+        state: directory
+        owner: openvpn
+        group: openvpn
+
+    - name: upload Makefile
+      copy:
+        src: Makefile
+        dest: /opt/openvpn/Makefile
+        group: openvpn
+        owner: openvpn
+
+    - name: create server config
+      shell: HOST_UID=$(id -u openvpn) HOST_GID=$(id -g openvpn) make config/server.conf
+      args:
+        chdir: /opt/openvpn
+
+    - name: create client config
+      shell: HOST_UID=$(id -u openvpn) HOST_GID=$(id -g openvpn) CLIENT_NAME={{ client_name }} REMOTE_IP={{ remote_ip }} make client
+      args:
+        chdir: /opt/openvpn
+
+    - name: download client config
+      fetch:
+        src: /opt/openvpn/config/clients/{{ client_name }}.ovpn
+        dest: ./
+        flat: yes
+
+    - name: run openvpn server
+      docker_container:
+        name: "openvpn-server"
+        image: "{{ docker_image_tag }}"
+        ports:
+          - "{{ remote_ip }}:1194:1194/udp"
+        volumes:
+          - /opt/openvpn/config:/openvpn/config
+          - /opt/openvpn/config/ccd:/openvpn/ccd
+        capabilities:
+          - NET_ADMIN
+        devices:
+          - /dev/net/tun:/dev/net/tun
+        command: openvpn --config config/server.conf
+        recreate: yes
+        restart: yes
+        restart_policy: always

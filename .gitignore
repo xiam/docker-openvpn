@@ -1,3 +1,5 @@
 *.sw?
 private
 config
+ansible.hosts
+*.ovpn

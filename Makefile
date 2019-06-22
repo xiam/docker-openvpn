@@ -1,13 +1,14 @@
-DH_PARAMS_SIZE       ?= 2048
-REMOTE_IP     ?= 127.0.0.1
+DH_PARAMS_SIZE        ?= 2048
+REMOTE_IP             ?= 127.0.0.1
 
-DOCKER_IMAGE  ?= xiam/openvpn
-DOCKER_TAG    ?= latest
+DOCKER_REPOSITORY     ?= xiam/openvpn
+DOCKER_TAG            ?= latest
+DOCKER_IMAGE_TAG      ?= $(DOCKER_REPOSITORY):$(DOCKER_TAG)
 
-CLIENT_NAME   ?= client
+CLIENT_NAME           ?= client
 
-HOST_UID      ?= $(shell id -u)
-HOST_GID      ?= $(shell id -g)
+HOST_UID              ?= $(shell id -u)
+HOST_GID              ?= $(shell id -g)
 
 .PHONY: config
 
@@ -18,11 +19,9 @@ define docker_run
 		-v $(PWD)/private:/openvpn/private \
 		-e HOST_UID=$(HOST_UID) \
 		-e HOST_GID=$(HOST_GID) \
-		-t $(DOCKER_IMAGE) \
+		-t $(DOCKER_IMAGE_TAG) \
 		$(1)
 endef
-
-all: docker-build config
 
 clean:
 	rm -rf config private
@@ -31,11 +30,10 @@ directories:
 	mkdir -p private config
 
 docker-build:
-	docker build -t $(DOCKER_IMAGE) .
+	docker build -t $(DOCKER_IMAGE_TAG) .
 
 docker-push: docker-build
-	docker tag $(DOCKER_IMAGE) $(DOCKER_IMAGE):$(DOCKER_TAG) && \
-	docker push $(DOCKER_IMAGE)
+	docker push $(DOCKER_IMAGE_TAG)
 
 private/ca.key:
 	$(call docker_run,ovpn-cfgen build-ca --workdir private)
@@ -59,7 +57,14 @@ config/clients/%.ovpn: config/server.conf
 	$(MAKE) private/clients/$(CLIENT_NAME).key && \
 	$(call docker_run,ovpn-cfgen client-config --ca private/ca.crt --cert private/clients/$(CLIENT_NAME).crt --key private/clients/$(CLIENT_NAME).key --remote $(REMOTE_IP) --tls-crypt private/key.tlsauth --output config/clients/$$(basename $(CLIENT_NAME)).ovpn)
 
-client: docker-build directories
-	$(MAKE) "config/clients/$(CLIENT_NAME).ovpn"
+client: directories
+	$(MAKE) config/clients/$(CLIENT_NAME).ovpn
 
-config: docker-build directories config/server.conf
+deploy:
+	echo "$(REMOTE_IP)" > ansible.hosts && \
+	ansible-playbook \
+		-e remote_ip="$(REMOTE_IP)" \
+		-e client_name="$(CLIENT_NAME)" \
+		-e docker_image_tag="$(DOCKER_IMAGE_TAG)" \
+		-i ansible.hosts \
+		playbook.yml
