@@ -33,7 +33,7 @@
         chdir: /opt/openvpn
 
     - name: create client config
-      shell: HOST_UID=$(id -u openvpn) HOST_GID=$(id -g openvpn) CLIENT_NAME={{ client_name }} REMOTE_IP={{ remote_ip }} make client
+      shell: HOST_UID=$(id -u openvpn) HOST_GID=$(id -g openvpn) CLIENT_NAME={{ client_name }} REMOTE_HOST={{ remote_host }} make client
       args:
         chdir: /opt/openvpn
 

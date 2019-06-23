@@ -63,7 +63,7 @@ client: directories
 deploy:
 	echo "$(REMOTE_HOST)" > ansible.hosts && \
 	ansible-playbook \
-		-e remote_ip="$(REMOTE_HOST)" \
+		-e remote_host="$(REMOTE_HOST)" \
 		-e client_name="$(CLIENT_NAME)" \
 		-e docker_image_tag="$(DOCKER_IMAGE_TAG)" \
 		-i ansible.hosts \
