@@ -5,7 +5,7 @@ RUN apk add --no-cache \
 
 RUN go install github.com/xiam/openvpn-config-generator/cmd/ovpn-cfgen@latest
 
-FROM alpine:3.15
+FROM alpine:3.18
 
 COPY --from=builder /go/bin/ovpn-cfgen /usr/bin/
 
@@ -13,6 +13,7 @@ RUN apk add --no-cache \
   iperf \
   shadow \
   openssl \
+  iptables \
   openvpn
 
 WORKDIR /openvpn
