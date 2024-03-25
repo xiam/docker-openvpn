@@ -1,11 +1,12 @@
-REMOTE_HOST           ?= 127.0.0.1
+HOST                  ?= 127.0.0.1
+
 DH_PARAMS_SIZE        ?= 2048
 
 DOCKER_REPOSITORY     ?= xiam/openvpn
-DOCKER_TAG            ?= latest
+DOCKER_TAG            ?= $(shell git rev-parse --short HEAD)
 DOCKER_IMAGE_TAG      ?= $(DOCKER_REPOSITORY):$(DOCKER_TAG)
 
-CLIENT_NAME           ?= client
+CLIENT                ?= client
 
 HOST_UID              ?= $(shell id -u)
 HOST_GID              ?= $(shell id -g)
@@ -54,17 +55,17 @@ config/server.conf: private/server.key
 	$(call docker_run,ovpn-cfgen server-config --ca private/ca.crt --cert private/server.crt --key private/server.key --dh private/dh.pem --tls-crypt private/key.tlsauth --output config/server.conf)
 
 config/clients/%.ovpn: config/server.conf
-	$(MAKE) private/clients/$(CLIENT_NAME).key && \
-	$(call docker_run,ovpn-cfgen client-config --ca private/ca.crt --cert private/clients/$(CLIENT_NAME).crt --key private/clients/$(CLIENT_NAME).key --remote $(REMOTE_HOST) --tls-crypt private/key.tlsauth --output config/clients/$$(basename $(CLIENT_NAME)).ovpn)
+	$(MAKE) private/clients/$(CLIENT).key && \
+	$(call docker_run,ovpn-cfgen client-config --ca private/ca.crt --cert private/clients/$(CLIENT).crt --key private/clients/$(CLIENT).key --remote $(HOST) --tls-crypt private/key.tlsauth --output config/clients/$$(basename $(CLIENT)).ovpn)
 
 client: directories
-	$(MAKE) config/clients/$(CLIENT_NAME).ovpn
+	$(MAKE) config/clients/$(CLIENT).ovpn
 
 deploy:
-	echo "$(REMOTE_HOST)" > ansible.hosts && \
+	echo "$(HOST)" > ansible.hosts && \
 	ansible-playbook \
-		-e remote_host="$(REMOTE_HOST)" \
-		-e client_name="$(CLIENT_NAME)" \
+		-e remote_host="$(HOST)" \
+		-e client_name="$(CLIENT)" \
 		-e docker_image_tag="$(DOCKER_IMAGE_TAG)" \
 		-i ansible.hosts \
 		playbook.yml
