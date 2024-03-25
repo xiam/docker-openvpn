@@ -1,11 +1,11 @@
-FROM golang:1.21-alpine AS builder
+FROM golang:1.22-alpine AS builder
 
 RUN apk add --no-cache \
   git
 
-RUN go install github.com/xiam/openvpn-config-generator/cmd/ovpn-cfgen@04aba3d118102d4d24e05f8ac441a30e0e8f44ee
+RUN go install github.com/xiam/openvpn-config-generator/cmd/ovpn-cfgen@9723757886b9db784aec2358c5a34beec78658c7
 
-FROM alpine:3.18
+FROM alpine:3.19
 
 COPY --from=builder /go/bin/ovpn-cfgen /usr/bin/
 
