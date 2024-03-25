@@ -3,7 +3,7 @@ HOST                  ?= 127.0.0.1
 DH_PARAMS_SIZE        ?= 2048
 
 DOCKER_REPOSITORY     ?= xiam/openvpn
-DOCKER_TAG            ?= latest
+DOCKER_TAG            ?= $(shell git rev-parse --short HEAD)
 DOCKER_IMAGE_TAG      ?= $(DOCKER_REPOSITORY):$(DOCKER_TAG)
 
 CLIENT                ?= client
